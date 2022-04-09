@@ -6,4 +6,4 @@ Setting up a simple host based firewall including optionally blocking all subnet
 * Tested on RHEL 7, RHEL 8, Fedora, Ubuntu 20.04.4
 * Examples of RFC 1918 whitelisting of networks and IPs is provided in the vars.yml
 * Examples using the RFC 3849 prefix for documentation purposes for whitelisting
-* Drops any package origination from Ptn-Land according to the RIPE database
+* Drops any package originating from Ptn-Land according to the RIPE database
