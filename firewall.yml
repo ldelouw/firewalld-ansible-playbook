@@ -76,7 +76,7 @@
 
   - name: Configure SELinux to allow SSHD to bind to port 12
     seport:
-      ports: 12
+      ports: 2222
       proto: tcp
       setype: ssh_port_t
       state: present
