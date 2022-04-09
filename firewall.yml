@@ -1,0 +1,104 @@
+---
+- hosts: all
+  name: configure firewalld
+  become: true
+  vars_files:
+    - ./vars.yml
+
+  tasks:
+
+  - name: Install firewall and SELinux related stuff on Red Hat and Fedora
+    yum:
+      name:
+        - python3-policycoreutils
+        - ipset
+        - firewalld
+        - git
+      state: installed
+    when: ansible_distribution == 'RedHat' or ansible_distribution == 'Fedora'
+
+  - name: Install firewall related stuff on Debian and Ubuntu
+    apt:
+      pkg:
+        - ipset
+        - firewalld
+        - git
+    when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
+
+  - name: Open public reachable ports
+    firewalld:
+      port: "{{ item }}"
+      state: enabled
+      permanent: true
+    loop: "{{ public_ports }}"
+
+  - name: Add trusted networks and IPs
+    firewalld:
+      source: "{{ item }}"
+      zone: trusted
+      state: enabled
+      permanent: true
+    loop: "{{ trusted_networks }}"
+
+  - name: Download git repo for RIPE subnets
+    ansible.builtin.git:
+      repo: "https://github.com/mivk/ip-country.git"
+      dest: /root/ip-country
+      single_branch: yes
+      version: master
+    when: fck_ptn
+
+  - name: Update RIPE Subnet list of ptn-country
+    shell: /root/ip-country/get-ripe-ips -o /root/ -c ru
+    when: fck_ptn
+
+  - name: Delete blacklist 
+    shell: firewall-cmd --delete-ipset=blacklist --permanent
+    when: fck_ptn
+
+  - name: Add blacklist
+    shell: firewall-cmd --permanent --new-ipset=blacklist --type=hash:net --option=family=inet --option=hashsize=4096 --option=maxelem=200000
+    when: fck_ptn
+
+  - name: Load entries from ptn blacklisted subnets from RIPE
+    shell: firewall-cmd --permanent --ipset=blacklist --add-entries-from-file=/root/ipv4_ru
+    when: fck_ptn
+
+  - name: Activate ptn Blacklist
+    shell: firewall-cmd --permanent --zone=drop --add-source=ipset:blacklist
+    when: fck_ptn
+
+  - name: Make sure firewalld is up and running
+    systemd:
+      name: firewalld
+      state: restarted
+      enabled: true
+
+  - name: Configure SELinux to allow SSHD to bind to port 12
+    seport:
+      ports: 12
+      proto: tcp
+      setype: ssh_port_t
+      state: present
+    when: ansible_distribution == 'RedHat' or ansible_distribution == 'Fedora'
+
+  - name: Ensure SELinux is in enforcing mode
+    selinux:
+      policy: targeted
+      state: enforcing
+    when: ansible_distribution == 'RedHat' or ansible_distribution == 'Fedora'
+
+  - name: Ensure rpcbind is disabled
+    service:
+      name: rpcbind.service
+      state: stopped
+      enabled: false
+    when: ansible_distribution == 'RedHat' or ansible_distribution == 'Fedora'
+
+  - name: Ensure rpcbind socket is disabled
+    service:
+      name: rpcbind.socket
+      state: stopped
+      enabled: false
+    when: ansible_distribution == 'RedHat' or ansible_distribution == 'Fedora'
+

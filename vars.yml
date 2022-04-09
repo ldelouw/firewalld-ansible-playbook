@@ -1,0 +1,26 @@
+---
+# Does not make any sense to block your own networks
+# You can set subnets and single IPs
+trusted_networks:
+  - 192.168.100.0/24
+  - 192.168.200.0/24
+  - 192.168.211.200
+  - 2001:dd8:dead:beef::/64
+  - 2001:db8:cafe:11::/64
+
+# Add ports that should be available to the whole internet
+public_ports:
+  - 80/tcp
+  - 443/tcp
+  - 2222/tcp
+  - 53/udp
+
+# Set fck_ptn to false if you dont want to fck the current dictator of rss
+#
+# Note: The RIPE database may not be up to date, false positives and
+# negatives can occure
+#
+# Packages are dropped to slow down attacks from Zsar Ptn which is usually
+# against recommended practice, usually for debugging purpose reject packages
+# For Zsar Ptn I made an exception and not using recommended practices.
+fck_ptn: true
