@@ -5,7 +5,7 @@ trusted_networks:
   - 192.168.100.0/24
   - 192.168.200.0/24
   - 192.168.211.200
-  - 2001:dd8:dead:beef::/64
+  - 2001:db8:dead:beef::/64
   - 2001:db8:cafe:11::/64
 
 # Add ports that should be available to the whole internet
