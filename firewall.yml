@@ -41,6 +41,12 @@
       permanent: true
     loop: "{{ trusted_networks }}"
 
+  - name: Ensure Firewalld is running
+    service:
+      name: firewalld
+      state: started
+      enabled: true
+
   - name: Download git repo for RIPE subnets
     ansible.builtin.git:
       repo: "https://github.com/mivk/ip-country.git"
@@ -116,3 +122,4 @@
       state: stopped
       enabled: false
     when: ansible_distribution == 'RedHat' or ansible_distribution == 'Fedora'
+
