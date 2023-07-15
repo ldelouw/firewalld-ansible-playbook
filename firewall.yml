@@ -23,6 +23,7 @@
         - ipset
         - firewalld
         - git
+      state: present
     when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian'
 
   - name: Open public reachable ports
@@ -55,13 +56,27 @@
   - name: Delete blacklist 
     shell: firewall-cmd --delete-ipset=blacklist --permanent
     when: fck_ptn
+    ignore_errors: true
+
+  - name: Delete blacklist for IPv6
+    shell: firewall-cmd --delete-ipset=blacklist6 --permanent
+    when: fck_ptn
+    ignore_errors: true
 
   - name: Add blacklist
     shell: firewall-cmd --permanent --new-ipset=blacklist --type=hash:net --option=family=inet --option=hashsize=4096 --option=maxelem=200000
     when: fck_ptn
 
+  - name: Add blacklist for IPv6
+    shell: firewall-cmd --permanent --new-ipset=blacklist6 --type=hash:net --option=family=inet6 --option=hashsize=4096 --option=maxelem=200000
+    when: fck_ptn
+
   - name: Load entries from ptn blacklisted subnets from RIPE
     shell: firewall-cmd --permanent --ipset=blacklist --add-entries-from-file=/root/ipv4_ru
+    when: fck_ptn
+
+  - name: Load entries from ptn blacklisted subnets from RIPE
+    shell: firewall-cmd --permanent --ipset=blacklist6 --add-entries-from-file=/root/ipv6_ru
     when: fck_ptn
 
   - name: Activate ptn Blacklist
@@ -74,7 +89,7 @@
       state: restarted
       enabled: true
 
-  - name: Configure SELinux to allow SSHD to bind to port 12
+  - name: Configure SELinux to allow SSHD to bind to port 2222
     seport:
       ports: 2222
       proto: tcp
@@ -101,4 +116,3 @@
       state: stopped
       enabled: false
     when: ansible_distribution == 'RedHat' or ansible_distribution == 'Fedora'
-
