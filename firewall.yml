@@ -89,6 +89,10 @@
     shell: firewall-cmd --permanent --zone=drop --add-source=ipset:blacklist
     when: fck_ptn
 
+  - name: Activate ptn Blacklist IPv6
+    shell: firewall-cmd --permanent --zone=drop --add-source=ipset:blacklist6
+    when: fck_ptn
+
   - name: Make sure firewalld is up and running
     systemd:
       name: firewalld
