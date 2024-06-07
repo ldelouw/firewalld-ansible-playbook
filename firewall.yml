@@ -59,7 +59,7 @@
     shell: /root/ip-country/get-ripe-ips -o /root/ -c ru
     when: fck_ptn
 
-  - name: Delete blacklist 
+  - name: Delete blacklist IPv4
     shell: firewall-cmd --delete-ipset=blacklist --permanent
     when: fck_ptn
     ignore_errors: true
@@ -69,7 +69,7 @@
     when: fck_ptn
     ignore_errors: true
 
-  - name: Add blacklist
+  - name: Add blacklist for IPv4
     shell: firewall-cmd --permanent --new-ipset=blacklist --type=hash:net --option=family=inet --option=hashsize=4096 --option=maxelem=200000
     when: fck_ptn
 
@@ -77,19 +77,19 @@
     shell: firewall-cmd --permanent --new-ipset=blacklist6 --type=hash:net --option=family=inet6 --option=hashsize=4096 --option=maxelem=200000
     when: fck_ptn
 
-  - name: Load entries from ptn blacklisted subnets from RIPE
+  - name: Load entries from ptn blacklisted IPv4 subnets from RIPE
     shell: firewall-cmd --permanent --ipset=blacklist --add-entries-from-file=/root/ipv4_ru
     when: fck_ptn
 
-  - name: Load entries from ptn blacklisted subnets from RIPE
+  - name: Load entries from ptn blacklisted IPv6 prefixes from RIPE
     shell: firewall-cmd --permanent --ipset=blacklist6 --add-entries-from-file=/root/ipv6_ru
     when: fck_ptn
 
-  - name: Activate ptn Blacklist
+  - name: Activate ptn Blacklist for IPv4
     shell: firewall-cmd --permanent --zone=drop --add-source=ipset:blacklist
     when: fck_ptn
 
-  - name: Activate ptn Blacklist IPv6
+  - name: Activate ptn Blacklist for IPv6
     shell: firewall-cmd --permanent --zone=drop --add-source=ipset:blacklist6
     when: fck_ptn
 
